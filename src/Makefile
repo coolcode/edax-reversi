@@ -85,7 +85,7 @@ ifeq ($(CC),gcc)
 	CFLAGS += -march=$(ARCH)
 
 	ifeq ($(OS),osx)
-		CFLAGS += -mdynamic-no-pic
+		CFLAGS += -mdynamic-no-pic -D__STDC_NO_THREADS__
 	endif
 	ifeq ($(OS),windows)
 		CFLAGS += -D__USE_MINGW_ANSI_STDIO

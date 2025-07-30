@@ -491,6 +491,74 @@ void obf_filter(const char *input_file, const char *output_file)
 }
 
 /**
+ * @brief Test a single puzzle from text input.
+ * @param search Search.
+ * @param puzzle_text The puzzle board text.
+ * @param color The player color ('B' or 'W').
+ */
+void obf_test_text(Search *search, const char *puzzle_text, char color)
+{
+	OBF obf;
+	Board board;
+	int player;
+	char formatted_puzzle[128];
+	
+	// Validate color parameter
+	if (color != 'B' && color != 'W') {
+		fprintf(stderr, "Error: Color must be 'B' or 'W'\n");
+		return;
+	}
+	
+	// Create the full puzzle string by appending color
+	snprintf(formatted_puzzle, sizeof(formatted_puzzle), "%s %c", puzzle_text, color);
+	
+	// Parse the puzzle text
+	char *next = parse_board(formatted_puzzle, &board, &player);
+	if (next == formatted_puzzle) {
+		fprintf(stderr, "Error: Invalid puzzle format\n");
+		return;
+	}
+	
+	// Set up OBF structure
+	obf.board = board;
+	obf.player = player;
+	obf.n_moves = 0;
+	obf.best_score = -SCORE_INF;
+	obf.comments = NULL;
+	
+	// Set search observer with custom output format
+	search_set_observer(search, search_observer);
+	search->options.verbosity = 0; // Suppress normal output
+	
+	// Perform the search
+	search_cleanup(search);
+	search_set_board(search, &obf.board, obf.player);
+	search_set_level(search, options.level, search->n_empties);
+	if (options.depth >= 0) search->options.depth = MIN(options.depth, search->n_empties);
+	if (options.selectivity >= 0) search->options.selectivity = options.selectivity;
+
+	if (options.play_type == EDAX_TIME_PER_MOVE) search_set_move_time(search, options.time);
+	else search_set_game_time(search, options.time);
+
+	search_run(search);
+	
+	// Format and print output in requested format
+	uint64_t nodes = search_count_nodes(search);
+	uint64_t time_ms = search_time(search);
+	double nps = time_ms > 0 ? 1000.0 * nodes / time_ms : 0;
+	
+	printf("depth:%d, time:", search->result->depth);
+	time_print(time_ms, false, stdout);
+	printf(", nodes:%" PRIu64 ", nps:%.0f, principal:", nodes, nps);
+	
+	// Print principal variation
+	line_print(&search->result->pv, 200, " ", stdout);
+	printf("\n");
+	
+	obf_free(&obf);
+}
+
+/**
  * @brief Test edax speed by running for at least 1 minutes on problems deeper and deeper.
  * @param search Search.
  */

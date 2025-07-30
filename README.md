@@ -44,6 +44,75 @@ curl -OL https://github.com/abulmo/edax-reversi/releases/download/v4.4/eval.7z #
 ./bin/lEdax-x64
 ```
 
+## Changes
+
+### 2025-7-30 add a command -x <problem file's text> to solve a text-based board
+
+Add a new command -x <problem file's text>, like -solve <problem file>. 
+
+**What is `-solve` command?**
+
+Format: <board_line> <side_to_move> <expected_move (optional)>  
+Sample problem file content:
+--XXXXX-O-XXXO--OOXXXOX-OOOOXOX---OOOOXX--OOOOX----O------------ B
+O-XXXX--O-XXX---OXXXXOXOOOXOXOX---OOOXXX--OOOOX----X------------ W
+
+See more: ./problem/**.obf
+
+```bash
+edax -eval-file ./bin/data/eval.dat -l 10 -solve ./problem/fforum-1-19.obf
+                                                                             
+ # | depth|score|       time   |  nodes (N)  |   N/s    | principal variation
+---+------+-----+--------------+-------------+----------+---------------------
+  1|   14   +18        0:00.003         93479   31159667 g8 H7 a8 A6 a4 A7 b6
+  2|   14   +10        0:00.001         32852   32852000 a4 B7 a3 A2 b8 A7 g7
+  3|   14   +02        0:00.003        156099   52033000 d1 G1 b8 C1 g3 A8 g2
+  4|   14   +00        0:00.001         37134   37134000 h8 B6 a7 H7 g7 A5 b7
+  5|   14   +32        0:00.001         14229   14229000 g8 G7 h8 G2 b2 A2 a1
+  6|   14   +14        0:00.002         73073   36536500 h3 H4 h6 A7 a8 H7 h8
+  7|   14   +08        0:00.001         22615   22615000 a6 C8 b7 A7 a8 B8 h8
+  8|   15   +08        0:00.003        299184   99728000 E1 h7 H6 g7 H8 g8 H2
+  9|   15   -08        0:00.001         66877   66877000 G7 a7 A4 h7 H1 g1 H8
+ 10|   15   +10        0:00.003        156204   52068000 B2 b7 G1 g8 H8 g7 H7
+ 11|   15   +30        0:00.001         72557   72557000 B3 a3 A6 c3 B4 pa A2
+ 12|   15   -08        0:00.002        132727   66363500 B7 h2 A7 a8 H1 g1 B2
+ 13|   16   +14        0:00.004        115791   28947750 b7 H7 h8 A8 g8 G2 a7
+ 14|   16   +18        0:00.004        116035   29008750 a3 B7 a4 B2 b1 G2 a1
+ 15|   16   +04        0:00.006        423312   70552000 g3 F1 c1 D1 b8 A8 g1
+ 16|   16   +24        0:00.006        272616   45436000 f8 B6 a7 C7 h1 G7 h7
+ 17|   16   +08        0:00.002         35515   17757500 f8 F7 g8 H3 h7 B7 b2
+ 18|   16   -02        0:00.003        211938   70646000 g2 B7 a8 A7 g8 H1 f1
+ 19|   16   +08        0:00.005        253083   50616600 b6 B5 a6 C8 b7 A7 a8
+---+------+-----+--------------+-------------+----------+---------------------
+./problem/fforum-1-19.obf: 2585320 nodes in  0:00.052 (cpu =  0:00.132) (49717692 nodes/s).  
+
+```
+
+**New command -x**
+
+```bash
+edax -l <level:1-60> -c <color:B/W> -x <puzzle text without last color char> 
+```
+
+Example:
+
+```bash
+edax -l 10 -c B -x "--XXXXX--OOOXX-O-OOOXXOX-OXOXOXXOXXXOXXX--XOXOXX-XXXOOO--OOOOO--"     
+                                                  
+depth:14, time: 0:00.003, nodes:94622, nps:31540667, principal:g8 H7 a8 A6 a4 A7 b6 A2 h8 A3 h1 G2 a1 B1 
+```
+
+**Build at Macbook Air M2**
+
+```bash
+cd src/
+make build ARCH=armv8.4-a CC=clang OS=osx
+
+cd ../bin/
+./mEdax-armv8.4-a -l 20 -c B -x "--XXXXX-O-XXXO--OOXXXOX-OOOOXOX---OOOOXX--OOOOX----O------------"
+
+```
+
 ## Document
 
 ```sh
@@ -51,6 +120,7 @@ cd src
 doxygen
 open ../doc/html/index.html
 ```
+
 ## version 4.6
 version 4.6 is an evolution of version 4.4 that tried to incorporate changes made by Toshihiko Okuhara in version 4.5.3 and :
  - keep the code encapsulated: I revert many pieces of code from version 4.5.3 with manually inlined code.

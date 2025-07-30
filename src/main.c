@@ -23,6 +23,7 @@
 #include "util.h"
 
 #include <locale.h>
+#include <ctype.h>
 
 /**
  * @brief Print version & copyright.
@@ -54,6 +55,8 @@ void usage(void)
 		" -nboard NBoard protocol.\n"
 		" -cassio Cassio protocol.\n"
 		" -solve <problem_file>    Automatic problem solver/checker.\n"
+		" -x <puzzle_text>         Solve puzzle from text without color suffix.\n"
+		" -c <color>               Specify color (B/W) for -x option.\n"
 		" -wtest <wthor_file>      Test edax using WThor's theoric score.\n"
 		" -count <level>           Count positions up to <level>.\n");
 	options_usage();
@@ -74,6 +77,8 @@ int main(int argc, char **argv)
 	char *problem_file = NULL;
 	char *wthor_file = NULL;
 	char *count_type = NULL;
+	char *puzzle_text = NULL;
+	char puzzle_color = 0;
 	int n_bench = 0;
 	bool test = false;
 
@@ -102,6 +107,8 @@ int main(int argc, char **argv)
 		else if (strcmp(arg, "wtest") == 0 && argv[i + 1]) wthor_file = argv[++i];
 		else if (strcmp(arg, "bench") == 0 && argv[i + 1]) n_bench = atoi(argv[++i]);
 		else if (strcmp(arg, "test") == 0) test = true;
+		else if (strcmp(arg, "x") == 0 && argv[i + 1]) puzzle_text = argv[++i];
+		else if (strcmp(arg, "c") == 0 && argv[i + 1]) puzzle_color = toupper(argv[++i][0]);
 		else if (strcmp(arg, "count") == 0 && argv[i + 1]) {
 			count_type = argv[++i];
 			if (argv[i + 1]) level = string_to_int(argv[++i], 0);
@@ -121,15 +128,16 @@ int main(int argc, char **argv)
 	search_global_init();
 
 	// solver & tester
-	if (problem_file || wthor_file || n_bench) {
+	if (problem_file || wthor_file || n_bench || puzzle_text) {
 		Search search;
 		search_init(&search);
 		search.options.header = " depth|score|       time   |  nodes (N)  |   N/s    | principal variation";
 		search.options.separator = "------+-----+--------------+-------------+----------+---------------------";
-		if (options.verbosity) version();
+		if (options.verbosity && !puzzle_text) version();
 		if (problem_file) obf_test(&search, problem_file, NULL);
 		if (wthor_file) wthor_test(wthor_file, &search);
 		if (n_bench) obf_speed(&search, n_bench);
+		if (puzzle_text) obf_test_text(&search, puzzle_text, puzzle_color);
 		HASH_STATS(printf("pv_table     : %12llu stores %12llu probes %12llu found probes\n", search.pv_table.n_store, search.pv_table.n_try, search.pv_table.n_found);)
 		HASH_STATS(printf("hash_table   : %12llu stores %12llu probes %12llu found probes\n", search.hash_table.n_store, search.hash_table.n_try, search.hash_table.n_found);)
 		HASH_STATS(printf("shallow_table: %12llu stores %12llu probes %12llu found probes\n", search.shallow_table.n_store, search.shallow_table.n_try, search.shallow_table.n_found);)
