@@ -547,9 +547,8 @@ void obf_test_text(Search *search, const char *puzzle_text, char color)
 	uint64_t time_ms = search_time(search);
 	double nps = time_ms > 0 ? 1000.0 * nodes / time_ms : 0;
 	
-	printf("depth:%d, time:", search->result->depth);
-	time_print(time_ms, false, stdout);
-	printf(", nodes:%" PRIu64 ", nps:%.0f, principal:", nodes, nps);
+	printf("depth:%d, time:%" PRIu64 ", nodes:%" PRIu64 ", nps:%.0f, score:%d, principal:", 
+		search->result->depth, time_ms, nodes, nps, search->result->score);
 	
 	// Print principal variation
 	line_print(&search->result->pv, 200, " ", stdout);
