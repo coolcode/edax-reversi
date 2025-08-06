@@ -91,25 +91,26 @@ edax -eval-file ./bin/data/eval.dat -l 10 -solve ./problem/fforum-1-19.obf
 **New command -x**
 
 ```bash
-edax -l <level:1-60> -c <color:B/W> -x <puzzle text without last color char> 
+edax -l <level:1-60> -c <color:B/W> -x <puzzle text 64 chars> 
 ```
 
 Example:
 
 ```bash
-edax -l 10 -c B -x "--XXXXX--OOOXX-O-OOOXXOX-OXOXOXXOXXXOXXX--XOXOXX-XXXOOO--OOOOO--"     
+edax -l 10 -c B -x --XXXXX--OOOXX-O-OOOXXOX-OXOXOXXOXXXOXXX--XOXOXX-XXXOOO--OOOOO--
                                                   
-depth:14, time: 0:00.003, nodes:94622, nps:31540667, principal:g8 H7 a8 A6 a4 A7 b6 A2 h8 A3 h1 G2 a1 B1 
+depth:14, time: 2, nodes:93533, nps:46766500, score:18, principal:g8 H7 a8 A6 a4 A7 b6 A2 h8 A3 h1 G2 a1 B1
 ```
 
 **Build at Macbook Air M2**
 
 ```bash
 cd src/
-make build ARCH=armv8.4-a CC=clang OS=osx
+make build ARCH=armv8.4-a CC=clang OS=osx EXE=edax
 
 cd ../bin/
-./mEdax-armv8.4-a -l 20 -c B -x "--XXXXX-O-XXXO--OOXXXOX-OOOOXOX---OOOOXX--OOOOX----O------------"
+./edax -l 20 -c B -x --XXXXX-O-XXXO--OOXXXOX-OOOOXOX---OOOOXX--OOOOX----O------------
+./edax -l 20 -c b -x ..bbbbb.w.bbbw..wwbbbwb.wwwwbwb...wwwwbb..wwwwb....w............
 
 ```
 
